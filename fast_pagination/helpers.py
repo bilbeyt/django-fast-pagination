@@ -11,9 +11,8 @@ class FastPaginator(Paginator):
     def __init__(self, object_list, per_page, orphans=0,
                  allow_empty_first_page=True):
         super().__init__(object_list, per_page, orphans, allow_empty_first_page)
-        self.ids = object_list
         if isinstance(object_list, QuerySet):
-            self.ids = list(self.object_list.values_list('id', flat=True))
+            self.ids = list(object_list.values_list('id', flat=True))
 
     @cached_property
     def count(self):
