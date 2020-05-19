@@ -1,6 +1,6 @@
 ## Fast Paginator for Django
 
-Fast is a simple Django app to paginate Django Querysets. Core Django Paginator uses **LIMIT** and **OFFSET** when creating queries to execute. This application is not using **LIMIT** and **OFFSET**, so it gets faster results. If you have millions of entries in a table, then Django will make you wait a lot longer than this app!
+Fast Paginator is a simple Django app to paginate Django Querysets. Core Django Paginator uses **LIMIT** and **OFFSET** when creating queries to execute. This application is not using **LIMIT** and **OFFSET**, so it gets faster results. If you have millions of entries in a table, then Django will make you wait a lot longer than this app!
 
 ## Quick Start
 
