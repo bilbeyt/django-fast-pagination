@@ -12,7 +12,8 @@ class FastPaginator(Paginator):
 
     def __init__(self, object_list, per_page, orphans=0,
                  allow_empty_first_page=True):
-        super().__init__(object_list, per_page, orphans, allow_empty_first_page)
+        super().__init__(object_list, per_page, orphans,
+                         allow_empty_first_page)
         self.cache_key = self.get_paginator_cache_key()
         self.timeout = getattr(settings, "FAST_PAGINATION_TIMEOUT", 3600)
         if isinstance(object_list, QuerySet):
@@ -27,8 +28,8 @@ class FastPaginator(Paginator):
         if result is None:
             c = getattr(self.object_list, 'count', None)
             if callable(c) and not inspect.isbuiltin(c) \
-                and method_has_no_args(c) \
-                and isinstance(self.object_list, QuerySet):
+               and method_has_no_args(c) \
+               and isinstance(self.object_list, QuerySet):
                 result = c()
             else:
                 result = len(self.object_list)

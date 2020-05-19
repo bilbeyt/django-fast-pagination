@@ -13,9 +13,9 @@ class FastPaginatorTestMethods(unittest.TestCase):
 
     def test_page_not_an_integer(self):
         example_list = ['1', '2', '3']
-        with self.assertRaises(InvalidPage):
+        with self.assertRaises(PageNotAnInteger):
             paginator = FastPaginator(example_list, 2)
-            paginator.page(1.5)
+            paginator.page(None)
 
     def test_page_empty(self):
         example_list = []
