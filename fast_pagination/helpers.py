@@ -32,7 +32,7 @@ class FastQuerysetPaginator(Paginator, BaseFastPaginator):
         encoded_query = str(object_list.query).encode('utf-8')
         raw_query_key = str(
             hashlib.md5(encoded_query).hexdigest())
-        self.cache_ids_key = f"fastpaginator:ids_{raw_query_key}"
+        self.cache_pks_key = f"fastpaginator:pks_{raw_query_key}"
         self.cache_count_key = f"fastpaginator:count_{raw_query_key}"
 
     @property
@@ -45,12 +45,12 @@ class FastQuerysetPaginator(Paginator, BaseFastPaginator):
         return result
 
     @property
-    def ids(self):
-        result = cache.get(self.cache_ids_key)
+    def pks(self):
+        result = cache.get(self.cache_pks_key)
         if result is None:
             result = list(
-                self.object_list.values_list('id', flat=True)) 
-            cache.set(self.cache_ids_key, result,
+                self.object_list.values_list('pk', flat=True)) 
+            cache.set(self.cache_pks_key, result,
                       timeout=self.TIMEOUT)
         return result
 
@@ -60,8 +60,8 @@ class FastQuerysetPaginator(Paginator, BaseFastPaginator):
         top = bottom + self.per_page
         if top + self.orphans >= self.count:
             top = self.count
-        ids = self.ids[bottom:top]
-        object_list = self.object_list.filter(id__in=ids)
+        pks = self.pks[bottom:top]
+        object_list = self.object_list.filter(pk__in=pks)
         return self._get_page(object_list, number, self)
 
     def _get_page(self, *args, **kwargs):
