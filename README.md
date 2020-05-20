@@ -17,3 +17,11 @@ Fast Paginator is a simple Django app to paginate Django Querysets. Core Django 
     from fast_pagination.helpers import FastPaginator
 ```
 4. Then, you are ready. All you have to do is give your queryset and number of entries when creating FastPaginator object.
+
+## To Run Tests
+
+1. Create a dummy project.
+2. Run following command.
+```python
+./manage.py test fast_pagination.tests
+```

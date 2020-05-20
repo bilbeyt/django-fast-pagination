@@ -1,5 +1,5 @@
 import unittest
-from helpers import FastPaginator
+from fast_pagination.helpers import FastPaginator
 from django.core.paginator import InvalidPage, PageNotAnInteger, EmptyPage
 
 
