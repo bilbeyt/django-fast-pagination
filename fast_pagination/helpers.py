@@ -10,6 +10,9 @@ from django.db.models.query import QuerySet
 class BaseFastPaginator(metaclass=abc.ABCMeta):
     TIMEOUT = getattr(
         settings, "FAST_PAGINATION_TIMEOUT", 3600)
+    PREFIX = getattr(
+        settings, "FAST_PAGINATION_PREFIX", "fastpagination"
+    )
 
     @abc.abstractmethod
     def count():
@@ -32,8 +35,8 @@ class FastQuerysetPaginator(Paginator, BaseFastPaginator):
         encoded_query = str(object_list.query).encode('utf-8')
         raw_query_key = str(
             hashlib.md5(encoded_query).hexdigest())
-        self.cache_pks_key = f"fastpaginator:pks_{raw_query_key}"
-        self.cache_count_key = f"fastpaginator:count_{raw_query_key}"
+        self.cache_ids_key = f"{self.PREFIX}:pks:{raw_query_key}"
+        self.cache_count_key = f"{self.PREFIX}:count:{raw_query_key}"
 
     @property
     def count(self):
@@ -77,7 +80,7 @@ class FastObjectPaginator(BaseFastPaginator, Paginator):
                              "for your results")
         super().__init__(object_list, per_page, orphans,
             allow_empty_first_page)
-        self.cache_count_key = f"fastpaginator:count_{cache_key}"
+        self.cache_count_key = f"{self.PREFIX}:count:{cache_key}"
 
     def page(self, number):
         number = self.validate_number(number)

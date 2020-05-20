@@ -12,11 +12,12 @@ Fast Paginator is a simple Django app to paginate Django Querysets. Core Django 
     ]
 ```
 2. In Django settings, you can set FAST_PAGINATION_TIMEOUT variable to invalidate cache. Default value is 1 hour.
-3. Import FastPaginator like this:
+3. In Django settings, you can set FAST_PAGINATION_PREFIX variable to use in cache keys. Default values is 'fastpagination'.
+4. Import FastPaginator like this:
 ```python
     from fast_pagination.helpers import FastPaginator
 ```
-4. Then, you are ready. All you have to do is give your queryset and number of entries when creating FastPaginator object.
+5. Then, you are ready. All you have to do is give your queryset and number of entries when creating FastPaginator object.
 
 ## To Run Tests
 
