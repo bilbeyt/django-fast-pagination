@@ -1,13 +1,26 @@
 ## Fast Paginator for Django
+Simple speedy pagination over your large database tables.
 
-Fast Paginator is a simple Django app to paginate Django Querysets. Core Django Paginator uses **LIMIT** and **OFFSET** when creating queries to execute. This application is not using **LIMIT** and **OFFSET**, so it gets faster results. If you have millions of entries in a table, then Django will make you wait a lot longer than this app!
+## Features
+
+**Simple Integration**
+
+FastPaginator API is compatible with Django's built-in pagination library. Only change your import statements then you're ready.
+
+**Better SQL Queries**
+
+Django's built-in pagination system builds SQL queries that have offset and limit clauses. FastPagination does not use them.
+
+**Built-in Cache System**
+
+FastPaginator has a built-in cache system. It does not cache QuerySets but caches primary keys of object lists. This provides speedup for pagination progress.
 
 ## Quick Start
 
 1. Add "fast_pagination" to your INSTALLED_APPS setting like this:
 ```python
     INSTALLED_APPS = [
-        ...
+        ... 
         'fast_pagination'
     ]
 ```
