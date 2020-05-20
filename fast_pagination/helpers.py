@@ -32,8 +32,8 @@ class FastQuerysetPaginator(Paginator, BaseFastPaginator):
         encoded_query = str(object_list.query).encode('utf-8')
         raw_query_key = str(
             hashlib.md5(encoded_query).hexdigest())
-        self.cache_ids_key = f"ids_{raw_query_key}"
-        self.cache_count_key = f"count_{raw_query_key}"
+        self.cache_ids_key = f"fastpaginator:ids_{raw_query_key}"
+        self.cache_count_key = f"fastpaginator:count_{raw_query_key}"
 
     @property
     def count(self):
@@ -73,11 +73,11 @@ class FastObjectPaginator(BaseFastPaginator, Paginator):
     def __init__(self, object_list, per_page, orphans=0,
                  allow_empty_first_page=True, cache_key=None):
         if cache_key is None:
-            raise ValueError("You should give cache_key" +
+            raise ValueError("You should provide cache_key" +
                              "for your results")
         super().__init__(object_list, per_page, orphans,
             allow_empty_first_page)
-        self.cache_count_key = f"count_{cache_key}"
+        self.cache_count_key = f"fastpaginator:count_{cache_key}"
 
     def page(self, number):
         number = self.validate_number(number)
