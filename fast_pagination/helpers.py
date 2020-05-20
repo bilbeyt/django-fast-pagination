@@ -35,7 +35,7 @@ class FastQuerysetPaginator(Paginator, BaseFastPaginator):
         encoded_query = str(object_list.query).encode('utf-8')
         raw_query_key = str(
             hashlib.md5(encoded_query).hexdigest())
-        self.cache_ids_key = f"{self.PREFIX}:pks:{raw_query_key}"
+        self.cache_pks_key = f"{self.PREFIX}:pks:{raw_query_key}"
         self.cache_count_key = f"{self.PREFIX}:count:{raw_query_key}"
 
     @property
