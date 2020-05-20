@@ -1,39 +1,57 @@
-import inspect
-from datetime import datetime
+import abc
+import hashlib
 
 from django.core.paginator import Paginator, Page
 from django.core.cache import cache
 from django.conf import settings
 from django.db.models.query import QuerySet
-from django.utils.inspect import method_has_no_args
 
 
-class FastPaginator(Paginator):
+class BaseFastPaginator(metaclass=abc.ABCMeta):
+    TIMEOUT = getattr(
+        settings, "FAST_PAGINATION_TIMEOUT", 3600)
 
+    @abc.abstractmethod
+    def count():
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def page(self, number):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _get_page(self, *args, **kwargs):
+        raise NotImplementedError
+
+
+class FastQuerysetPaginator(Paginator, BaseFastPaginator):
     def __init__(self, object_list, per_page, orphans=0,
                  allow_empty_first_page=True):
         super().__init__(object_list, per_page, orphans,
-                         allow_empty_first_page)
-        self.cache_key = self.get_paginator_cache_key()
-        self.timeout = getattr(settings, "FAST_PAGINATION_TIMEOUT", 3600)
-        if isinstance(object_list, QuerySet):
-            self.ids = list(object_list.values_list('id', flat=True))
-
-    def get_paginator_cache_key(self):
-        return datetime.now().isoformat()
+            allow_empty_first_page)
+        encoded_query = str(object_list.query).encode('utf-8')
+        raw_query_key = str(
+            hashlib.md5(encoded_query).hexdigest())
+        self.cache_ids_key = f"ids_{raw_query_key}"
+        self.cache_count_key = f"count_{raw_query_key}"
 
     @property
     def count(self):
-        result = cache.get(self.cache_key)
+        result = cache.get(self.cache_count_key)
         if result is None:
-            c = getattr(self.object_list, 'count', None)
-            if callable(c) and not inspect.isbuiltin(c) \
-               and method_has_no_args(c) \
-               and isinstance(self.object_list, QuerySet):
-                result = c()
-            else:
-                result = len(self.object_list)
-            cache.set(self.cache_key, result, timeout=self.timeout)
+            result = self.object_list.count()
+            cache.set(self.cache_count_key, result,
+                      timeout=self.TIMEOUT)
+        return result
+
+    @property
+    def ids(self):
+        result = cache.get(self.cache_ids_key)
+        if result is None:
+            result = list(
+                self.object_list.values_list('id', flat=True)) 
+            cache.set(self.cache_ids_key, result,
+                      timeout=self.TIMEOUT)
         return result
 
     def page(self, number):
@@ -42,17 +60,61 @@ class FastPaginator(Paginator):
         top = bottom + self.per_page
         if top + self.orphans >= self.count:
             top = self.count
-        object_list = self.object_list[bottom:top]
-        if isinstance(self.object_list, QuerySet):
-            ids = self.ids[bottom:top]
-            object_list = self.object_list.filter(id__in=ids)
+        ids = self.ids[bottom:top]
+        object_list = self.object_list.filter(id__in=ids)
         return self._get_page(object_list, number, self)
 
     def _get_page(self, *args, **kwargs):
-        return FastPage(*args, **kwargs)
+        return FastQuerysetPage(*args, **kwargs)
 
 
-class FastPage(Page):
+class FastObjectPaginator(BaseFastPaginator, Paginator):
 
+    def __init__(self, object_list, per_page, orphans=0,
+                 allow_empty_first_page=True, cache_key=None):
+        if cache_key is None:
+            raise ValueError("You should give cache_key" +
+                             "for your results")
+        super().__init__(object_list, per_page, orphans,
+            allow_empty_first_page)
+        self.cache_count_key = f"count_{cache_key}"
+
+    def page(self, number):
+        number = self.validate_number(number)
+        bottom = (number - 1) * self.per_page
+        top = bottom + self.per_page
+        if top + self.orphans >= self.count:
+            top = self.count
+        object_list = self.object_list[bottom:top]
+        return self._get_page(object_list, number, self)
+
+    @property
+    def count(self):
+        result = cache.get(self.cache_count_key)
+        if result is None:
+            result = len(self.object_list)
+            cache.set(self.cache_count_key, result,
+                      timeout=self.TIMEOUT)
+        return result
+
+    def _get_page(self, *args, **kwargs):
+        return FastObjectPage(*args, **kwargs)
+
+
+class FastPaginator():
+
+    def __new__(cls, *args, **kwargs):
+        object_list = args[0]
+        if isinstance(object_list, QuerySet):
+            return FastQuerysetPaginator(*args, **kwargs)
+        return FastObjectPaginator(*args, **kwargs)
+
+
+class FastQuerysetPage(Page):
     def __len__(self):
         return len(self.paginator.ids)
+
+
+class FastObjectPage(Page):
+    def __len__(self):
+        return len(self.paginator.object_list)
