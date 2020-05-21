@@ -22,6 +22,12 @@ Django's built-in pagination system builds SQL queries that have offset and limi
 
 FastPaginator has a built-in cache system. It does not cache QuerySets but caches primary keys of object lists. This provides speedup for pagination progress.
 
+## Usage Advices
+
+1. Use this package with cache servers like redis.
+2. This package for large database tables. 
+3. If the queryset required is complex, this paginator can be helpful, since it first gets all the primary keys and use them to filter further.
+
 ## Quick Start
 
 1. Add "fast_pagination" to your INSTALLED_APPS setting like this:
