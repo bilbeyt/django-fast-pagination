@@ -46,3 +46,28 @@ FastPaginator has a built-in cache system. It does not cache QuerySets but cache
 ```python
 ./manage.py test fast_pagination.tests
 ```
+
+## Benchmark
+
+This benchmark is executed on Postgres9.6 with a table that has 1000000 rows, and fetched only one field. Results can be seen below.
+
+| Paginator     | Min              | Max              | Mean             | StdDev        | Median           |
+|---------------|------------------|------------------|------------------|---------------|------------------|
+| Django        | 93.5535 (1.53) | 95.7217 (1.54) | 94.7340 (1.53) | 0.9755 (2.32) | 94.9046 (1.54) |
+| FastPaginator | 61.1488 (1.0)   | 62.3316 (1.0)    | 61.7489 (1.0)    | 0.4205 (1.0)  | 61.7649 (1.0)    |
+
+
+You can also run benchmark tests following instructions:
+
+1. Run migrations if app needs using
+```bash
+./manage.py migrate
+```
+2. Call generate_users command from command line using
+```bash
+./manage.py generate_users 1000000
+```
+3. Run tests using
+```bash
+pytest fast_pagination/tests.py
+```
