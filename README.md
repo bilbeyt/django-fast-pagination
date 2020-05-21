@@ -1,3 +1,10 @@
+![Issues](https://img.shields.io/github/issues/bilbeyt/django-fast-pagination)
+![Forks](https://img.shields.io/github/forks/bilbeyt/django-fast-pagination)
+![Stars](https://img.shields.io/github/stars/bilbeyt/django-fast-pagination)
+![License](https://img.shields.io/github/license/bilbeyt/django-fast-pagination)
+![Twitter](https://img.shields.io/twitter/url?url=https%3A%2F%2Fgithub.com%2Fbilbeyt%2Fdjango-fast-pagination)
+
+
 ## Fast Paginator for Django
 Simple speedy pagination over your large database tables.
 
