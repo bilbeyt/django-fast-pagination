@@ -5,6 +5,7 @@ from django.core.paginator import Paginator, Page
 from django.core.cache import cache
 from django.conf import settings
 from django.db.models.query import QuerySet
+from django.core.exceptions import EmptyResultSet
 
 
 class BaseFastPaginator(metaclass=abc.ABCMeta):
@@ -28,15 +29,18 @@ class BaseFastPaginator(metaclass=abc.ABCMeta):
 
 
 class FastQuerysetPaginator(Paginator, BaseFastPaginator):
-    def __init__(self, object_list, per_page, orphans=0,
-                 allow_empty_first_page=True):
-        super().__init__(object_list, per_page, orphans,
-            allow_empty_first_page)
-        encoded_query = str(object_list.query).encode('utf-8')
-        raw_query_key = str(
-            hashlib.md5(encoded_query).hexdigest())
-        self.cache_pks_key = f"{self.PREFIX}:pks:{raw_query_key}"
-        self.cache_count_key = f"{self.PREFIX}:count:{raw_query_key}"
+    cache_pks_key = None
+    cache_count_key = None
+
+    def __init__(self, object_list, per_page, orphans=0, allow_empty_first_page=True):
+        super().__init__(object_list, per_page, orphans, allow_empty_first_page)
+        try:
+            encoded_query = str(object_list.query).encode("utf-8")
+            raw_query_key = str(hashlib.md5(encoded_query).hexdigest())
+            self.cache_pks_key = f"{self.PREFIX}:pks:{raw_query_key}"
+            self.cache_count_key = f"{self.PREFIX}:count:{raw_query_key}"
+        except EmptyResultSet:
+            pass
 
     @property
     def count(self):
